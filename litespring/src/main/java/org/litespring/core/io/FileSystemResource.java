@@ -1,6 +1,6 @@
 package org.litespring.core.io;
 
-import java.io.InputStream;
+import java.io.*;
 
 /**
  * @author wangjunkai
@@ -9,14 +9,25 @@ import java.io.InputStream;
  **/
 public class FileSystemResource implements Resource {
 
+    private String path;
+    private File file;
+
+    public FileSystemResource(String path) {
+        this.path = path;
+        this.file = new File(path);
+    }
 
     @Override
-    public InputStream getInputStream() {
-        return null;
+    public InputStream getInputStream() throws IOException {
+        InputStream inputStream = new FileInputStream(this.file);
+        if (inputStream == null) {
+            throw new FileNotFoundException("file can't found:" + path);
+        }
+        return inputStream;
     }
 
     @Override
     public String getDescription() {
-        return null;
+        return this.path;
     }
 }
