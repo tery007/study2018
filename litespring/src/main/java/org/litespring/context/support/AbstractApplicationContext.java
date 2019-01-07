@@ -21,6 +21,7 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
         Resource resource = this.getResourceByPath(configFile);
         XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(defaultBeanFactory);
         reader.loadBeanDefinitions(resource);
+        //初始化defaultBeanFactory中的classLoader，在调用defaultBeanFactory.getBean(beanId)时使用
         defaultBeanFactory.setBeanClassLoader(this.getBeanClassLoader());
     }
 
@@ -29,7 +30,6 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
         return this.defaultBeanFactory.getBean(beanId);
     }
 
-    @Override
     public BeanDefinition getBeanDefinition(String beanId) {
         return this.defaultBeanFactory.getBeanDefinition(beanId);
     }

@@ -1,6 +1,10 @@
 package org.litespring.beans.factory.support;
 
+import org.litespring.beans.PropertyValue;
 import org.litespring.beans.factory.BeanDefinition;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author wangjunkai
@@ -17,6 +21,7 @@ public class GenericBeanDefinition implements BeanDefinition {
 
     private boolean prototype = false;
 
+    private List<PropertyValue> propertyValues = new ArrayList<>();
 
 
     public GenericBeanDefinition(String beanId,String className) {
@@ -49,6 +54,11 @@ public class GenericBeanDefinition implements BeanDefinition {
     @Override
     public boolean isPrototype() {
         return this.prototype;
+    }
+
+    @Override
+    public List<PropertyValue> getPropertyValues(){
+        return this.propertyValues;
     }
 
 }

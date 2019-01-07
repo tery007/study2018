@@ -1,5 +1,9 @@
 package org.litespring.beans.factory;
 
+import org.litespring.beans.PropertyValue;
+
+import java.util.List;
+
 /**
  * @author wanglei
  * @description
@@ -17,4 +21,6 @@ public interface BeanDefinition {
     boolean isSingleton();
 
     boolean isPrototype();
+
+    List<PropertyValue> getPropertyValues();
 }

@@ -1,11 +1,16 @@
 package org.litespring.beans.factory.support;
 
+import org.litespring.beans.PropertyValue;
 import org.litespring.beans.factory.BeanCreationException;
 import org.litespring.beans.factory.BeanDefinition;
 import org.litespring.beans.factory.BeanFactory;
 import org.litespring.beans.factory.config.ConfigurableBeanFactory;
 import org.litespring.util.ClassUtils;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,10 +51,15 @@ public class DefaultBeanFactory extends DefaultSingletonBeanRegistry implements 
             return bean;
         }
         return createBean(beanDefinition);
-
     }
 
     private Object createBean(BeanDefinition beanDefinition) {
+        Object bean = initializeBean(beanDefinition);
+        populateBean(bean, beanDefinition);
+        return bean;
+    }
+
+    private Object initializeBean(BeanDefinition beanDefinition) {
         ClassLoader classLoader = this.getBeanClassLoader();
         String beanClassName = beanDefinition.getBeanClassName();
         try {
@@ -58,6 +68,38 @@ public class DefaultBeanFactory extends DefaultSingletonBeanRegistry implements 
         } catch (Exception e) {
             throw new BeanCreationException("create bean for " + beanClassName + " failed", e);
         }
+    }
+
+    /**
+     * 通过反射的方式将bean的属性设置到bean中
+     * @param bean
+     * @param beanDefinition
+     */
+    private void populateBean(Object bean, BeanDefinition beanDefinition) {
+        List<PropertyValue> pvs = beanDefinition.getPropertyValues();
+        if (pvs == null || pvs.size() == 0) {
+            return;
+        }
+        BeanDefinitionValueResolver resolver = new BeanDefinitionValueResolver(this);
+        try {
+            for (PropertyValue pv : pvs) {
+                String propertyName = pv.getName();
+                Object originalValue = pv.getValue();
+                Object resolveValue = resolver.resolveValueIfNecessary(originalValue);
+
+                BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
+                PropertyDescriptor[] descriptors = beanInfo.getPropertyDescriptors();
+                for (PropertyDescriptor pd : descriptors) {
+                    if (pd.getName().equals(propertyName)) {
+                        pd.getWriteMethod().invoke(bean, resolveValue);
+                        break;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new BeanCreationException("Failed to obtain BeanInfo for class [" + beanDefinition.getBeanClassName() + "]", e);
+        }
+
     }
 
     @Override

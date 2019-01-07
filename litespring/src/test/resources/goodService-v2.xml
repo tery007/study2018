@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+  
+  <bean id="goodService"
+        class="org.litespring.service.v2.GoodService" >
+   
+  	<property name="goodDao" ref="goodDao"/>
+    <property name="debitDao" ref="debitDao"/>
+    <property name="owner" value="wangjunkai"/>
+    <property name="version"  value="2"/>
+    
+  </bean> 
+  
+ <bean id="goodDao"  class="org.litespring.dao.v2.GoodDao">
+  </bean>
+
+  <bean id="debitDao" class="org.litespring.dao.v2.DebitDao">
+  </bean>
+
+</beans>
+
