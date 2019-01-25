@@ -1,5 +1,6 @@
 package org.litespring.beans.factory;
 
+import org.litespring.beans.ConstructorArgument;
 import org.litespring.beans.PropertyValue;
 
 import java.util.List;
@@ -23,4 +24,6 @@ public interface BeanDefinition {
     boolean isPrototype();
 
     List<PropertyValue> getPropertyValues();
+
+    ConstructorArgument getConstructorArgument();
 }

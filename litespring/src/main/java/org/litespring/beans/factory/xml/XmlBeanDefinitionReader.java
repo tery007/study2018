@@ -1,8 +1,6 @@
 package org.litespring.beans.factory.xml;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggerFactory;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
@@ -18,7 +16,9 @@ import org.litespring.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author wangjunkai
@@ -29,14 +29,18 @@ public class XmlBeanDefinitionReader {
 
     public static final Logger logger = Logger.getLogger(XmlBeanDefinitionReader.class);
 
-    public static final String ID_ATTRIBUTE = "id";
-    public static final String CLASS_ATTRIBUTE = "class";
-    public static final String SCOPE_ATTRIBUTE = "scope";
-    public static final String PROPERTY_ELEMENT = "property";
-    public static final String NAME_ATTRIBUTE = "name";
-    public static final String REF_ATTRIBUTE = "ref";
-    public static final String VALUE_ATTRBUTE = "value";
+    public static final String ID_ATTRIBUTE            = "id";
+    public static final String CLASS_ATTRIBUTE         = "class";
+    public static final String SCOPE_ATTRIBUTE         = "scope";
+    public static final String PROPERTY_ELEMENT        = "property";
+    public static final String NAME_ATTRIBUTE          = "name";
+    public static final String REF_ATTRIBUTE           = "ref";
+    public static final String VALUE_ATTRBUTE          = "value";
+    public static final String CONSTRUCTOR_ARG_ELEMENT = "constructor-arg";
+    public static final String TYPE_ATTRIBUTE          = "type";
+
     private BeanDefinitionRegistry register;
+
     public XmlBeanDefinitionReader(BeanDefinitionRegistry register) {
         this.register = register;
     }
@@ -45,6 +49,7 @@ public class XmlBeanDefinitionReader {
     /**
      * 加载resource资源，解析xml文件，
      * 将beanId和class构成的BeanDefinition注册到BeanDefinitionRegistry中
+     *
      * @param resource
      * @throws
      */
@@ -63,13 +68,14 @@ public class XmlBeanDefinitionReader {
                 if (ele.attribute(SCOPE_ATTRIBUTE) != null) {
                     bd.setScope(ele.attributeValue(SCOPE_ATTRIBUTE));
                 }
+                parseConstructorArgElements(ele, bd);
                 parsePropertyElement(ele, bd);
                 register.registerBeanDefinition(beanId, bd);
             });
 
         } catch (Exception e) {
             throw new BeanDefinitionStoreException("IOException parsing XML document from " + resource.getDescription(), e);
-        }finally {
+        } finally {
             if (inputStream != null) {
                 try {
                     inputStream.close();
@@ -81,23 +87,34 @@ public class XmlBeanDefinitionReader {
     }
 
     /**
+     * 解析<constructor-arg/>标签元素
+     *
+     * @param ele
+     * @param bd
+     */
+    private void parseConstructorArgElements(Element ele, BeanDefinition bd) {
+
+    }
+
+    /**
      * 解析<property></property>标签元素
      *
      * @param ele
      * @param bd
      */
     private void parsePropertyElement(Element ele, BeanDefinition bd) {
-        List<Element> elements = ele.elements();
-        elements.stream().forEach(e -> {
-            String propertyName = e.attributeValue(NAME_ATTRIBUTE);
+        Iterator it = ele.elementIterator(PROPERTY_ELEMENT);
+        while (it.hasNext()) {
+            Element proElement = (Element) it.next();
+            String propertyName = proElement.attributeValue(NAME_ATTRIBUTE);
             if (!StringUtils.hasLength(propertyName)) {
                 logger.error("Tag 'property' must have a 'name' attribute");
                 return;
             }
-            Object val = parsePropertyValue(e, propertyName);
+            Object val = parsePropertyValue(proElement, propertyName);
             PropertyValue pv = new PropertyValue(propertyName, val);
             bd.getPropertyValues().add(pv);
-        });
+        }
     }
 
     private Object parsePropertyValue(Element e, String propertyName) {

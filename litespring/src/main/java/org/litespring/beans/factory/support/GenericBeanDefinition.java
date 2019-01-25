@@ -1,5 +1,6 @@
 package org.litespring.beans.factory.support;
 
+import org.litespring.beans.ConstructorArgument;
 import org.litespring.beans.PropertyValue;
 import org.litespring.beans.factory.BeanDefinition;
 
@@ -22,6 +23,8 @@ public class GenericBeanDefinition implements BeanDefinition {
     private boolean prototype = false;
 
     private List<PropertyValue> propertyValues = new ArrayList<>();
+
+    private ConstructorArgument argument = new ConstructorArgument();
 
 
     public GenericBeanDefinition(String beanId,String className) {
@@ -59,6 +62,11 @@ public class GenericBeanDefinition implements BeanDefinition {
     @Override
     public List<PropertyValue> getPropertyValues(){
         return this.propertyValues;
+    }
+
+    @Override
+    public ConstructorArgument getConstructorArgument() {
+        return this.argument;
     }
 
 }
