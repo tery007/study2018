@@ -14,7 +14,7 @@ public class ThreadPoolUtil {
 
     /**
      * 创建只有一个线程的线程池
-     * @param threadName
+     * @param threadName 指定线程名称
      * @return
      */
     public static ExecutorService singleWithThreadName(String threadName) {
