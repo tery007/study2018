@@ -59,5 +59,13 @@ public class ConstructorArgument {
         public void setValue(Object value) {
             this.value = value;
         }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 }

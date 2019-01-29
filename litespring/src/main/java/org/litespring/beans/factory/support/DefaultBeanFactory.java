@@ -54,12 +54,17 @@ public class DefaultBeanFactory extends DefaultSingletonBeanRegistry implements 
     }
 
     private Object createBean(BeanDefinition beanDefinition) {
-        Object bean = initializeBean(beanDefinition);
+        Object bean = instantiateBean(beanDefinition);
         populateBean(bean, beanDefinition);
         return bean;
     }
 
-    private Object initializeBean(BeanDefinition beanDefinition) {
+    /**
+     * 创建bean实例
+     * @param beanDefinition
+     * @return
+     */
+    private Object instantiateBean(BeanDefinition beanDefinition) {
         ClassLoader classLoader = this.getBeanClassLoader();
         String beanClassName = beanDefinition.getBeanClassName();
         try {

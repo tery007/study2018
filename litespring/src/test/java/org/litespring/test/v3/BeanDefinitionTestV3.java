@@ -35,6 +35,6 @@ public class BeanDefinitionTestV3 {
         RuntimeBeanReference rbr2 = (RuntimeBeanReference) list.get(1).getValue();
         Assert.assertEquals("itemDao", rbr2.getBeanName());
         TypedStringValue tsv = (TypedStringValue) list.get(2).getValue();
-        Assert.assertEquals(1,tsv);
+        Assert.assertEquals("1",tsv.getValue());
     }
 }
