@@ -15,7 +15,7 @@ public class GoodService {
     private String     owner;
     private int        version;
 
-    public GoodService(ItemDao itemDao, AccountDao accoutDao, int version) {
+    public GoodService(AccountDao accoutDao, ItemDao itemDao, int version) {
         this.itemDao = itemDao;
         this.accountDao = accoutDao;
         this.version = version;

@@ -65,6 +65,10 @@ public class DefaultBeanFactory extends DefaultSingletonBeanRegistry implements 
      * @return
      */
     private Object instantiateBean(BeanDefinition beanDefinition) {
+        if (beanDefinition.hasConstructorArgumentValues()) {
+            ConstructorResolver resolver = new ConstructorResolver(this);
+            return resolver.autowiedConstructor(beanDefinition);
+        }
         ClassLoader classLoader = this.getBeanClassLoader();
         String beanClassName = beanDefinition.getBeanClassName();
         try {

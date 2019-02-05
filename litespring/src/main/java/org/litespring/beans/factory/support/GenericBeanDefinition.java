@@ -69,4 +69,14 @@ public class GenericBeanDefinition implements BeanDefinition {
         return this.argument;
     }
 
+    @Override
+    public boolean hasConstructorArgumentValues() {
+        return !this.argument.isEmpty();
+    }
+
+    @Override
+    public String getID() {
+        return this.beanId;
+    }
+
 }
