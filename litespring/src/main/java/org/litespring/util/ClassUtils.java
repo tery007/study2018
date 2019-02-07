@@ -10,6 +10,12 @@ import java.util.Map;
  **/
 public class ClassUtils {
 
+    /** The package separator character: '.' */
+    private static final char PACKAGE_SEPARATOR = '.';
+
+    /** The path separator character: '/' */
+    private static final char PATH_SEPARATOR = '/';
+
     /**
      * 包装类对应的基本类型
      */
@@ -91,6 +97,16 @@ public class ClassUtils {
             }
         }
         return false;
+    }
+
+    public static String convertClassNameToResourcePath(String className) {
+        Assert.notNull(className, "className must be not null");
+        return className.replace(PACKAGE_SEPARATOR, PATH_SEPARATOR);
+    }
+
+    public static String convertResourcePathToClassName(String resourcePath) {
+        Assert.notNull(resourcePath, "resourcePath must be not null");
+        return resourcePath.replace(PATH_SEPARATOR, PACKAGE_SEPARATOR);
     }
 }
 
