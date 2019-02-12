@@ -10,11 +10,21 @@ import java.util.Map;
  **/
 public class ClassUtils {
 
-    /** The package separator character: '.' */
+    /**
+     * The package separator character: '.'
+     */
     private static final char PACKAGE_SEPARATOR = '.';
 
-    /** The path separator character: '/' */
+    /**
+     * The path separator character: '/'
+     */
     private static final char PATH_SEPARATOR = '/';
+
+    /** The CGLIB class separator: "$$" */
+    public static final String CGLIB_CLASS_SEPARATOR = "$$";
+
+    /** The inner class separator character: '$' */
+    private static final char INNER_CLASS_SEPARATOR = '$';
 
     /**
      * 包装类对应的基本类型
@@ -36,7 +46,7 @@ public class ClassUtils {
         wapperToPrimitiveTypeMap.put(Short.class, short.class);
         wapperToPrimitiveTypeMap.put(Float.class, float.class);
 
-        wapperToPrimitiveTypeMap.forEach((k,v)->{
+        wapperToPrimitiveTypeMap.forEach((k, v) -> {
             primitiveTowapperTypeMap.put(v, k);
         });
     }
@@ -45,8 +55,7 @@ public class ClassUtils {
         ClassLoader cl = null;
         try {
             cl = Thread.currentThread().getContextClassLoader();
-        }
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
             // Cannot access thread context ClassLoader - falling back...
         }
         if (cl == null) {
@@ -56,8 +65,7 @@ public class ClassUtils {
                 // getBeanClassLoader() returning null indicates the bootstrap ClassLoader
                 try {
                     cl = ClassLoader.getSystemClassLoader();
-                }
-                catch (Throwable ex) {
+                } catch (Throwable ex) {
                     // Cannot access system ClassLoader - oh well, maybe the caller can live with null...
                 }
             }
@@ -107,6 +115,17 @@ public class ClassUtils {
     public static String convertResourcePathToClassName(String resourcePath) {
         Assert.notNull(resourcePath, "resourcePath must be not null");
         return resourcePath.replace(PATH_SEPARATOR, PACKAGE_SEPARATOR);
+    }
+
+    public static String getShortName(String className) {
+        int lastDotIndex = className.lastIndexOf(PACKAGE_SEPARATOR);
+        int nameEndIndex = className.indexOf(CGLIB_CLASS_SEPARATOR);
+        if (nameEndIndex == -1) {
+            nameEndIndex = className.length();
+        }
+        String shortName = className.substring(lastDotIndex + 1, nameEndIndex);
+        shortName = shortName.replace(INNER_CLASS_SEPARATOR, PACKAGE_SEPARATOR);
+        return shortName;
     }
 }
 

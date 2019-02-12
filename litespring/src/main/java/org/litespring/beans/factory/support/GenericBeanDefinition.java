@@ -26,6 +26,9 @@ public class GenericBeanDefinition implements BeanDefinition {
 
     private ConstructorArgument argument = new ConstructorArgument();
 
+    public GenericBeanDefinition() {
+
+    }
 
     public GenericBeanDefinition(String beanId,String className) {
         this.beanId = beanId;
@@ -47,6 +50,10 @@ public class GenericBeanDefinition implements BeanDefinition {
     @Override
     public String getBeanClassName() {
         return this.className;
+    }
+
+    public void setBeanClassName(String className) {
+        this.className = className;
     }
 
     @Override
@@ -77,6 +84,10 @@ public class GenericBeanDefinition implements BeanDefinition {
     @Override
     public String getID() {
         return this.beanId;
+    }
+
+    public void setBeanId(String beanId) {
+        this.beanId = beanId;
     }
 
 }
