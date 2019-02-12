@@ -12,7 +12,6 @@ import org.litespring.core.io.type.classreading.SimpleMetaDataReader;
 import org.litespring.stereotype.Component;
 import org.litespring.util.StringUtils;
 
-import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 

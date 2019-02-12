@@ -12,6 +12,7 @@ import org.litespring.beans.factory.config.RuntimeBeanReference;
 import org.litespring.beans.factory.config.TypedStringValue;
 import org.litespring.beans.factory.support.BeanDefinitionRegistry;
 import org.litespring.beans.factory.support.GenericBeanDefinition;
+import org.litespring.context.annotation.ClassPathBeanDefinitionScanner;
 import org.litespring.core.io.Resource;
 import org.litespring.util.StringUtils;
 
@@ -38,6 +39,9 @@ public class XmlBeanDefinitionReader {
     public static final String VALUE_ATTRIBUTE         = "value";
     public static final String CONSTRUCTOR_ARG_ELEMENT = "constructor-arg";
     public static final String TYPE_ATTRIBUTE          = "type";
+    public static final String BEANS_NAMESPACE_URI     = "http://www.springframework.org/schema/beans";
+    public static final String CONTEXT_NAMESPACE_URI   = "http://www.springframework.org/schema/context";
+    private static final String BASE_PACKAGE_ATTRIBUTE = "base-package";
 
     private BeanDefinitionRegistry register;
 
@@ -62,15 +66,13 @@ public class XmlBeanDefinitionReader {
             Element rootElement = document.getRootElement();
             List<Element> elements = rootElement.elements();
             elements.stream().forEach(ele -> {
-                String beanId = ele.attributeValue(ID_ATTRIBUTE);
-                String clazz = ele.attributeValue(CLASS_ATTRIBUTE);
-                BeanDefinition bd = new GenericBeanDefinition(beanId, clazz);
-                if (ele.attribute(SCOPE_ATTRIBUTE) != null) {
-                    bd.setScope(ele.attributeValue(SCOPE_ATTRIBUTE));
+                String nameSpaceUri = ele.getNamespaceURI();
+                if (this.isDefaultNameSpace(nameSpaceUri)) {
+                    parseDefaultElement(ele);
+                } else if (this.isContextNameSpace(nameSpaceUri)) {
+                    parseComponentElement(ele);
                 }
-                parseConstructorArgElements(ele, bd);
-                parsePropertyElement(ele, bd);
-                register.registerBeanDefinition(beanId, bd);
+
             });
 
         } catch (Exception e) {
@@ -84,6 +86,32 @@ public class XmlBeanDefinitionReader {
                 }
             }
         }
+    }
+
+    private void parseComponentElement(Element ele) {
+        String basePackage = ele.attributeValue(BASE_PACKAGE_ATTRIBUTE);
+        ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this.register);
+        scanner.doScan(basePackage);
+    }
+
+    private void parseDefaultElement(Element ele) {
+        String beanId = ele.attributeValue(ID_ATTRIBUTE);
+        String clazz = ele.attributeValue(CLASS_ATTRIBUTE);
+        BeanDefinition bd = new GenericBeanDefinition(beanId, clazz);
+        if (ele.attribute(SCOPE_ATTRIBUTE) != null) {
+            bd.setScope(ele.attributeValue(SCOPE_ATTRIBUTE));
+        }
+        parseConstructorArgElements(ele, bd);
+        parsePropertyElement(ele, bd);
+        register.registerBeanDefinition(beanId, bd);
+    }
+
+    private boolean isContextNameSpace(String namespaceUri) {
+        return (!StringUtils.hasLength(namespaceUri) || CONTEXT_NAMESPACE_URI.equals(namespaceUri));
+    }
+
+    private boolean isDefaultNameSpace(String namespaceUri) {
+        return (!StringUtils.hasLength(namespaceUri) || BEANS_NAMESPACE_URI.equals(namespaceUri));
     }
 
     /**
@@ -142,8 +170,8 @@ public class XmlBeanDefinitionReader {
                 "<constructor-arg> element";
 
 
-        boolean hasRefAttribute = (ele.attribute(REF_ATTRIBUTE)!=null);
-        boolean hasValueAttribute = (ele.attribute(VALUE_ATTRIBUTE) !=null);
+        boolean hasRefAttribute = (ele.attribute(REF_ATTRIBUTE) != null);
+        boolean hasValueAttribute = (ele.attribute(VALUE_ATTRIBUTE) != null);
 
         if (hasRefAttribute) {
             String refName = ele.attributeValue(REF_ATTRIBUTE);
@@ -152,12 +180,11 @@ public class XmlBeanDefinitionReader {
             }
             RuntimeBeanReference ref = new RuntimeBeanReference(refName);
             return ref;
-        }else if (hasValueAttribute) {
+        } else if (hasValueAttribute) {
             TypedStringValue valueHolder = new TypedStringValue(ele.attributeValue(VALUE_ATTRIBUTE));
 
             return valueHolder;
-        }
-        else {
+        } else {
             throw new RuntimeException(elementName + " must specify a ref or value");
         }
     }
