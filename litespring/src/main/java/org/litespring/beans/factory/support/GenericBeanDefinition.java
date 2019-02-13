@@ -3,6 +3,7 @@ package org.litespring.beans.factory.support;
 import org.litespring.beans.ConstructorArgument;
 import org.litespring.beans.PropertyValue;
 import org.litespring.beans.factory.BeanDefinition;
+import org.litespring.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,7 @@ public class GenericBeanDefinition implements BeanDefinition {
 
     private String beanId;
     private String className;
-
+    private Class<?> beanClass;
     private String scope;
     private boolean singleton = true;
 
@@ -84,6 +85,34 @@ public class GenericBeanDefinition implements BeanDefinition {
     @Override
     public String getID() {
         return this.beanId;
+    }
+
+    /**
+     * 调用getBeanClass()之前必须调用resolveBeanClass()方法初始化
+     * @return
+     */
+    @Override
+    public Class<?> getBeanClass() {
+        if (this.beanClass == null) {
+            throw new IllegalStateException(
+                    "Bean class name [" + this.getBeanClassName() + "] has not been resolved into an actual Class");
+        }
+        return this.beanClass;
+    }
+
+    @Override
+    public Class<?> resolveBeanClass(ClassLoader classLoader) throws ClassNotFoundException {
+        String className = getBeanClassName();
+        Assert.notNull(className, "className is null");
+        Class<?> resolvedClass = classLoader.loadClass(className);
+        this.beanClass = resolvedClass;
+        return resolvedClass;
+
+    }
+
+    @Override
+    public boolean hasBeanClass() {
+        return this.beanClass != null;
     }
 
     public void setBeanId(String beanId) {
