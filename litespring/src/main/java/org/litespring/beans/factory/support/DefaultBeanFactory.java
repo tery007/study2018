@@ -4,14 +4,17 @@ import org.litespring.beans.PropertyValue;
 import org.litespring.beans.SimpleTypeConverter;
 import org.litespring.beans.factory.BeanCreationException;
 import org.litespring.beans.factory.BeanDefinition;
+import org.litespring.beans.factory.config.BeanPostProcessor;
 import org.litespring.beans.factory.config.ConfigurableBeanFactory;
 import org.litespring.beans.factory.config.DependencyDescriptor;
+import org.litespring.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.litespring.util.ClassUtils;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,6 +29,8 @@ public class DefaultBeanFactory extends DefaultSingletonBeanRegistry implements 
     private final Map<String, BeanDefinition> beanMap = new ConcurrentHashMap(1024);
 
     private ClassLoader beanClassLoader;
+
+    private List<BeanPostProcessor> beanPostProcessors = new ArrayList<BeanPostProcessor>();
 
     @Override
     public void registerBeanDefinition(String beanId, BeanDefinition beanDefinition) {
@@ -83,11 +88,19 @@ public class DefaultBeanFactory extends DefaultSingletonBeanRegistry implements 
 
     /**
      * 通过反射的方式将bean的属性设置到bean中
+     *
      * @param bean
-     * @param beanDefinition
+     * @param bd
      */
-    private void populateBean(Object bean, BeanDefinition beanDefinition) {
-        List<PropertyValue> pvs = beanDefinition.getPropertyValues();
+    private void populateBean(Object bean, BeanDefinition bd) {
+
+        for(BeanPostProcessor processor : this.getBeanPostProcessors()){
+            if(processor instanceof InstantiationAwareBeanPostProcessor){
+                ((InstantiationAwareBeanPostProcessor)processor).postProcessPropertyValues(bean, bd.getID());
+            }
+        }
+
+        List<PropertyValue> pvs = bd.getPropertyValues();
         if (pvs == null || pvs.size() == 0) {
             return;
         }
@@ -110,7 +123,7 @@ public class DefaultBeanFactory extends DefaultSingletonBeanRegistry implements 
                 }
             }
         } catch (Exception e) {
-            throw new BeanCreationException("Failed to obtain BeanInfo for class [" + beanDefinition.getBeanClassName() + "]", e);
+            throw new BeanCreationException("Failed to obtain BeanInfo for class [" + bd.getBeanClassName() + "]", e);
         }
 
     }
@@ -123,6 +136,16 @@ public class DefaultBeanFactory extends DefaultSingletonBeanRegistry implements 
     @Override
     public ClassLoader getBeanClassLoader() {
         return this.beanClassLoader == null ? ClassUtils.getDefaultClassLoader() : this.beanClassLoader;
+    }
+
+    @Override
+    public void addBeanPostProcessor(BeanPostProcessor postProcessor) {
+        beanPostProcessors.add(postProcessor);
+    }
+
+    @Override
+    public List<BeanPostProcessor> getBeanPostProcessors() {
+        return this.beanPostProcessors;
     }
 
     @Override
