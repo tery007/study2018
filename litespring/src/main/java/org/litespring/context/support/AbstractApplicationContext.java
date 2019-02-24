@@ -54,4 +54,9 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
         beanFactory.addBeanPostProcessor(postProcessor);
 
     }
+
+    @Override
+    public Class<?> getType(String beanName) {
+        return this.defaultBeanFactory.getType(beanName);
+    }
 }
