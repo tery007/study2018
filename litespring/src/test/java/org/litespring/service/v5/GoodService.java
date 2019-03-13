@@ -35,4 +35,8 @@ public class GoodService {
         MessageTracker.log(MessageTracker.PLACE_ORDER);
 
     }
+
+    public void placeOrderWithException(){
+        throw new NullPointerException();
+    }
 }
